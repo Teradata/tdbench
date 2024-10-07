@@ -1,0 +1,29 @@
+This documents recent changes outside the TdBench Java program for scripts that initiate
+and setup the environment.
+
+For detailed information about changes inside of TdBench command and execution capabilities,
+issue the TdBench command:  HELP RELEASE
+
+
+TdBench 8.01.03 Release Notes
+- Added basic host DBMS reporting capabilities for:
+  - Snowflake
+  - Redshift
+  - Google BigQuery
+
+TdBench 8.01.02 Release Notes
+
+- support for Teradata Vantage Lake Edition in addition to the Teradata Vantage Enterprise edition
+- streamlines support for benchmarks involving multiple DBMS platforms
+   - tdbench_config.sh/tdbench_config.bat sets basic information like jar version and default DBMS
+   - tdbench_xxx_config.sh/tdbench_xxx_config.bat sets environment variables for DBMS setup
+   - tdbench.tdb sets general session preferences across all DBMSs
+   - tdbench_xxx.tdb executes vendor specific CLASS, DB, BEFORE_RUN, AFTER_RUN
+- setup is moved into the TdBench java program for simpler portability across client platforms
+    - You can still put setup on the command line or issue the setup command interactively
+- added command line options and you can include TdBench commands along with scripts to execute
+   -i      - goes to interactive mode following executing scripts on the command line
+   -v      - verify the installation
+   -d DBMS - override the default DBMS set in tdbench_config.sh/tdbench_config.bat
+
+

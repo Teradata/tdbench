@@ -1,0 +1,47 @@
+# Parameters - :DbcTable, :PdcrDb, :PdcrTable
+echo View ${TdBenchDb}.:i1 joins ${TdBenchDb}.TestTracking and dbc.:i1 and unions :i2.:i3
+
+sql ${TdBenchServer} select tablename from dbc.tables where databasename = '${TdBenchDb}' and tablename = 'temppdcr';
+if :linecnt > 0 then sql ${TdBenchServer} drop table ${TdBenchDb}.temppdcr;
+sql ${TdBenchServer} create table ${TdBenchDb}.temppdcr as (select * from :i2.:i3) with no data;
+
+sql text:temp/dbql_temp.sql ${TdBenchServer} delim=eof
+select Qtext from (
+select 10 (named Qseq, integer, title ''), 'replace view ' || '${TdBenchDb}' || '.' || ':i1' || ' as'  (named Qtext, varchar(120), title '') from ${TdBenchDb}.onerow union
+select 20, 'select tt.RunID'  from ${TdBenchDb}.onerow union
+select 21, ',tt.ClientRunID'  from ${TdBenchDb}.onerow union
+select 25, ',tt.BenchSystemName ' from ${TdBenchDb}.onerow  union
+select 30,',tt.testname' from ${TdBenchDb}.onerow  union
+select 10000+dbc.columnid, ', ru.' || dbc.columnname
+    from dbc.ColumnsV dbc join dbc.ColumnsV pdcr
+       on dbc.databasename = 'dbc' and pdcr.databasename = '${TdBenchDb}'
+       and dbc.tablename = ':i1' and pdcr.tablename = 'temppdcr'
+       and dbc.columnname = pdcr.columnname
+       and dbc.columntype = pdcr.columntype
+ union
+select 20000, 'from dbc.' || ':i1' || ' ru  join ' || '${TdBenchDb}' || '.TestTracking tt' from ${TdBenchDb}.onerow union
+select 20005, ' on (((ru.TheDate (FORMAT ''YYYY-MM-DD'')) (VARCHAR(11))) || '' '' || (ru.TheTime (VARCHAR(11)))) (TIMESTAMP(2))' from ${TdBenchDb}.onerow union
+select 20010, ' between tt.ReleaseExecTime - interval ''1'' minute  and tt.ActualStopTime + interval ''1'' minute ' from ${TdBenchDb}.onerow union
+select 20015, 'where ru.TheDate >= Date ' from ${TdBenchDb}.onerow union
+select 20020, 'union all'  from ${TdBenchDb}.onerow union
+select 20030, 'select tt.RunID'  from ${TdBenchDb}.onerow  union
+select 20031, ',tt.ClientRunID'  from ${TdBenchDb}.onerow union
+select 20035, ',tt.BenchSystemName ' from ${TdBenchDb}.onerow  union
+select 20040,',tt.testname' from ${TdBenchDb}.onerow  union
+select 30000+dbc.columnid, ', ru.' || pdcr.columnname
+    from dbc.ColumnsV dbc join dbc.ColumnsV pdcr
+       on dbc.databasename = 'dbc' and pdcr.databasename = '${TdBenchDb}'
+       and dbc.tablename = ':i1' and pdcr.tablename = 'temppdcr'
+       and dbc.columnname = pdcr.columnname
+       and dbc.columntype = pdcr.columntype
+ union
+select 40000, 'from '|| ':i2' || '.' || ':i3' || ' ru  join  ' || '${TdBenchDb}' || '.TestTracking tt' from ${TdBenchDb}.onerow union
+select 40005, ' on (((ru.TheDate (FORMAT ''YYYY-MM-DD'')) (VARCHAR(11))) || '' '' || (ru.TheTime (VARCHAR(11)))) (TIMESTAMP(2))' from ${TdBenchDb}.onerow union
+select 40010, ' between tt.ReleaseExecTime - interval ''1'' minute  and tt.ActualStopTime + interval ''1'' minute ' from ${TdBenchDb}.onerow union
+select 40015, 'where ru.TheDate < date;' from ${TdBenchDb}.onerow
+) x order by Qseq;
+eof
+
+sql ${TdBenchServer} drop table ${TdBenchDb}.temppdcr;
+sql ${TdBenchServer} temp/dbql_temp.sql
+sql ${TdBenchServer} comment on ${TdBenchDb}.:i1  as 'TdBench testtracking extensions to dbc.:i1 union to PDCR'; 

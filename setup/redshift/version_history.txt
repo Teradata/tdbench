@@ -1,0 +1,5 @@
+Current release of this setup directory can be found at https://github.com/Teradata/tdbench.
+
+Release History:
+
+2024-10-04 - Initial release by Douglas Ebel of Teradata - setup.menu, scripts, help, and templates

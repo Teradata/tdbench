@@ -1,0 +1,12 @@
+------------------------- Help for editing create_tdbench.tdb -------------------------
+
+This script will:
+- run the test_connect.tdb script to get the logon and password of the user with rights 
+  to execute the create_tdbench.sql
+
+It will then execute the DDL in the create_tdbench.sql file. 
+
+If errors occur, you may need to re-execute the corrected statements using the SQL command, 
+or drop the partially created TdBenchDb user, correct the problem and execute create_tdbench.tdb
+again. 
+

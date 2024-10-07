@@ -1,0 +1,12 @@
+0|exec|copy_templates.tdb|Provides starter set of config files or just setup a DB for logon|setup/redshift/scripts/copy_templates.tdb
+
+1|:edit|tdbench_config.sh|OPTIONAL - customize execution for you to choose jar file version and default DBMS|tdbench_config.sh
+2|:edit|tdbench_redshift_config.sh|Customize environment variables such as passwords and directories|tdbench_redshift_config.sh
+3|:edit|tdbench.tdb|OPTIONAL - Initial command file executed by jar file to customize session settings|tdbench.tdb
+4|:edit|tdbench_redshift.tdb|Command file to define class and db connections for Teradata servers|tdbench_redshift.tdb
+
+5|exit 123|reset|IF NEEDED - Restart tdbench to reload the settings from above 4 config & .tdb files|
+
+6|exec|test_connect.tdb|Run simple select to validate your logon ID on host DBMS|setup/redshift/scripts/test_connect.tdb
+7|:edit|create_tdbench.sql|Edit the script with create tables and views for host DBMS query log reporting|setup/redshift/scripts/create_tdbench.sql
+8|exec|create_tdbench.tdb|Define the tables/views  on target Redshift DBMS|setup/redshift/scripts/create_tdbench.tdb

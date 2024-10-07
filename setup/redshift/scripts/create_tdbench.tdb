@@ -1,0 +1,20 @@
+echo delim=eof
+This will create tables and views in the database ${TdBenchDb} you created using other tools
+that will support reporting on system query logging table(s).
+
+Your default DB alias (from tdbench_redshift_config) is: ${TdBenchServer}
+eof
+set mydbms =
+exec setup/redshift/scripts/test_connect.tdb
+if :validate_variables = false then goto error_exit
+if :mydbms not set then goto error_exit
+
+sql :mydbms setup/redshift/scripts/create_tdbench.sql
+
+if :retcode = 0 then echo all create statements were successful
+if :retcode = 0 then goto exit
+
+label error_exit
+echo ... setup of tables and reporting views encountered errors. 
+
+label exit
