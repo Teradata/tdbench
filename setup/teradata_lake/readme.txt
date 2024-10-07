@@ -132,3 +132,8 @@ than for Teradata Vantage Enterprise edition since data is in multiple files on 
 local tables in DBC and PDCR. Usage of the path filtering constraints is critical to improving
 performance. Performance will be better for prior days than the current day due to consolidation 
 of logging files on the cloud  at the end of each day. 
+
+If you develop any setup or benchmark scripts, we would welcome submitting those to
+https://github.com/Teradata/tdbench.  You can also use github discussions
+for questions or raise issues there.
+

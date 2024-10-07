@@ -1,57 +1,47 @@
-While benchmarks have been executed on Netezza, we have not
+While benchmarks have been executed on Databricks, we have not
 captured the setup information from those engagements.
 You can look at one of the other non-Teradata DBMS setup directories
-as a guide for creating setup scripts you can use on Netezza.
+as a guide for creating setup scripts you can use on Databricks.
 
 Basic instructions:
 
-You will need to download the JDBC driver for Netezza.
+You will need to download the JDBC driver for Databricks.
 You can use Google or ChatGPT to get the current location.
 The following location may be valid:
 
-https://www.ibm.com/docs/en/netezza?topic=dls-installing-configuring-jdbc
+https://www.databricks.com/spark/jdbc-drivers-download
 
 The driver should be saved in the TdBench home directory (the same
 directory where tdbench.sh and tdbench.bat are located).
-The file name will likely be: nzjdbc.jar
+The file name will be something like: 
+   spark-jdbc_2.12-<version>.jar 
+(where <version> is the specific version number you are downloading)
 
 If this is the only DBMS you will be using with TdBench,
-you should create a tdbench.tdb file with a CLASS, DB and OPTION
-statement that will define your connection on every startup.
+you should create a tdbench.tdb file with a CLASS and DB statement
+that will define your connection on every startup.
 
-The following is probably a valid CLASS statement for Netezza:
-CLASS  org.netezza.Driver  jdbc:netezza  nzjdbc.jar
+The following is probably a valid CLASS statement for Databricks:
+CLASS  org.apache.spark.sql.execution.datasources.jdbc.JdbcDialect  jdbc:spark  spark-jdbc_2.12-*.jar
 
-The DB statement creates an alias that will allow you to logon to Netezza.
+The DB statement creates an alias that will allow you to logon to Databricks.
 It provides the URL, database name, user and password. It is highly
 recommended that you validate the user and password using a tool other
 than TdBench to ensure your platform has access and the user and
 password are valid.  The DB statement will be something like:
 
-DB  <alias>  jdbc:netezza://<host>:<port>/<database>  <user name>  <password>
+DB  <alias>  jdbc:spark://<host>:443/<database>  <user name>  <password>
 
 Where:
 -  Alias is a string you make up to reference the connection in SQL and WORKER statements
 -  <host> provides the URL or IP address of your server
--  <port> generally is 5480 but may be different. You should validate by connecting using another tool
--  <database> created for holding the data used in tests
+-  <database> created for holding the data used in tests, usually: default
 -  <user name>  <password> - credentials for logon to the GreenPlum DBMS.
 
-The Netezza JDBC does not automatically close one query when another is opened on
-the same connection, so it is necessary to instruct TdBench to open a record set
-on each query and close it so the driver doesn't think we are trying to keep
-open multiple concurrent queries for one worker's connection. Put the OPTION
-statement in your tdbench.tdb startup file if the TdBench installation will
-be used exclusively with Netezza, and either comment the line out or prompt
-the user or set an environment variable to determine whether the OPTION
-should be changed.  Example:
-
-   OPTION  createrecordset on workerclose off
-
-Assuming you gave "nz" as the alias on the DB statement, use the following
+Assuming you gave "brick" as the alias on the DB statement, use the following
 to test your connection:
 
-   sql nz select current_timestamp;
+   sql brick select current_timestamp as current_time;
 
 For other DBMSs, we have created a TestTracking table on the target
 DBMS and used the BEFORE_RUN and AFTER_RUN statements to run queries on the

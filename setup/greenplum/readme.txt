@@ -64,4 +64,5 @@ you add to TdBench's internal H2 database to the TestTracking table
 on the host DBMS. 
 
 If you develop any setup scripts, we would welcome submitting those to
-https://github.com/Teradata/tdbench.  You can also raise issues there. 
+https://github.com/Teradata/tdbench.  You can also use github discussions 
+for questions or raise issues there. 
