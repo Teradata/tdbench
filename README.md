@@ -1,6 +1,6 @@
 # TdBench - A Multi-DBMS Database Workload Simulation Tool
 
-TdBench installation zip file is free and available for download from the [Teradata Developer Portal](https://downloads.teradata.com/download/tools/tdbench-8-0-for-any-dbms). This github repository supports updated materials for multiple DBMSs. We welcome contributions of new materials supporting any vendor's DBMS and over time, those materials may be included in new releases of the installation zip file. We also welcome the posting of issues.
+TdBench installation zip file is free and available for download from the [Teradata Developer Portal](https://downloads.teradata.com/download/tools/tdbench-8-0-for-any-dbms). This github repository supports updated materials for multiple DBMSs. We welcome contributions of new materials supporting any vendor's DBMS and over time, those materials may be included in new releases of the installation zip file. We also welcome the posting of issues or using the Discussions tab to ask questions or submit ideas.
 
 ### Objectives and Features of TdBench
 
