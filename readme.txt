@@ -16,7 +16,8 @@ Resources:
 
    https://github.com/Teradata/tdbench - latest setups for non-Teradata DBMS,
        and place you can raise issues and submit your improvements to 
-       query log reporting on your DBMS> 
+       query log reporting on your DBMS. There is also a Discussions forum
+       where you can ask questions, provide feedback and submit ideas. 
 
 ****************************
 * Basic Usage Instructions *

@@ -112,3 +112,6 @@ table and enhance the DBC tables with RunID and TestName.
 There is a set of reporting level or semantic level views prefixed with "rpt..." that select a subset
 of columns and perform aggregations and analysis of the test results. 
 
+If you develop any setup or benchmark scripts, we would welcome submitting those to
+https://github.com/Teradata/tdbench.  You can also use github discussions
+for questions or raise issues there.
