@@ -1,0 +1,148 @@
+trace clear
+echo Setting up host reporting on ${TdBenchServer} in ${TdBenchDb}
+echo Creating TestTracking for test metadata and InfoData with release information and worker prefix.
+sql  ${TdBenchServer} delim=eof
+locking row for access select tablename from dbc.tables 
+where tablename = 'TdBenchInfo' and databasename = '${TdBenchDb}';
+eof
+if :retcode < 0 then goto logon_error
+if :retcode > 0 then goto benchmark_rights_missing
+if :linecnt > 0 then goto HaveInfoTbl
+
+sql ${TdBenchServer} delim=eof
+Create set table ${TdBenchDb}.TdBenchInfo
+  (InfoKey varchar(30),
+   InfoData varchar(256))
+Unique primary index(InfoKey);
+eof
+if :retcode > 0 then goto db_missing
+
+label HaveInfoTbl
+sql ${TdBenchServer} delim=eof
+update ${TdBenchDb}.TdBenchInfo set InfoData = '${TdBenchPrefix}'
+where InfoKey = 'PREFIX' else insert into ${TdBenchDb}.TdBenchInfo values('PREFIX','${TdBenchPrefix}');
+update ${TdBenchDb}.TdBenchInfo set InfoData = '${TdBenchVersion}'
+where InfoKey = 'VERSION' else insert into ${TdBenchDb}.TdBenchInfo values('VERSION','${TdBenchVersion}');
+eof
+if :retcode > 0 then goto db_rights_missing
+
+sql ${TdBenchServer} delim=eof
+locking row for access select tablename from dbc.tables
+where tablename = 'OneRow' and databasename = '${TdBenchDb}';
+eof
+if :linecnt > 0 then goto HaveOneRow
+
+sql ${TdBenchServer} delim=eof
+CREATE SET TABLE  ${TdBenchDb}.OneRow 
+     (
+      acol INTEGER)
+PRIMARY INDEX ( acol );
+insert into ${TdBenchDb}.onerow values(1);
+comment on table  ${TdBenchDb}.onerow as 'A table with one row for use in union statements that must reference a table when selecting constan
+ts';
+eof
+
+label HaveOneRow
+ 
+include setup/teradata/scripts/testtracking.tdb
+include setup/teradata/scripts/teststart.tdb
+include setup/teradata/scripts/teststop.tdb
+
+echo Creating base query logging and resusage views.
+if x${TdBenchPdcrDb} = x then goto dbconly
+if x${TdBenchPdcrDb} = xnone then goto dbconly
+
+if ${TdBenchPdcrDb} not set then goto pdcrdbmissing
+sql text:null ${TdBenchServer} select top 1 * from ${TdBenchPdcrDb}.${TdBenchPdcrDBQLogTbl};
+if :retcode != 0 then goto pdcrdbmissing
+
+## For the rest of the script, skip to eof if there is an error. create_view_hierarchy has its own error goto
+after_sql delete
+after_sql if :retcode > 0 then goto had_setup_error
+
+echo Setting up views against DBQL and Resusage tables in DBC and PDCR
+include setup/teradata/scripts/dbql_pdcr.tdb DBQLOGTBL ${TdBenchPdcrDb} ${TdBenchPdcrDBQLogTbl}
+
+include setup/teradata/scripts/dbql_pdcr_other.tdb DBQLOGTBL DBQLSQLTBL ${TdBenchPdcrDb} ${TdBenchPdcrDBQLSqlTbl} ${TdBenchPdcrDBQLogTbl}
+include setup/teradata/scripts/dbql_pdcr_other.tdb DBQLOGTBL DBQLOBJTBL ${TdBenchPdcrDb} ${TdBenchPdcrDBQLObjTbl} ${TdBenchPdcrDBQLogTbl}
+include setup/teradata/scripts/dbql_pdcr_other.tdb DBQLOGTBL DBQLSTEPTBL ${TdBenchPdcrDb} ${TdBenchPdcrDBQLStepTbl} ${TdBenchPdcrDBQLogTbl}
+include setup/teradata/scripts/dbql_pdcr_other.tdb DBQLOGTBL DBQLEXPLAINTBl ${TdBenchPdcrDb} ${TdBenchPdcrDBQLExplainTbl} ${TdBenchPdcrDBQLogTbl}
+include setup/teradata/scripts/findtable.tdb dbc DBQLPARAMTBL
+## if :linecnt > 0 then include setup/teradata/scripts/dbql_pdcr_other.tdb DBQLOGTBL DBQLPARAMTBL ${TdBenchPdcrDb} ${TdBenchPdcrDBQLParamTbl} ${TdBenchPdcrDBQLogTbl}
+## include setup/teradata/scripts/findtable.tdb dbc DBQLUTILITYTBL
+if :linecnt > 0 then include setup/teradata/scripts/dbql_pdcr_util.tdb DBQLUTILITYTBL ${TdBenchPdcrDb} ${TdBenchPDCRDBQLUtilityTbl}
+
+# ResUsageIpma
+# ResUsageIvpr
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSawt ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSawt}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageScpu ${TdBenchPdcrDb} ${TdBenchPdcrResUsageScpu}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageShst ${TdBenchPdcrDb} ${TdBenchPdcrResUsageShst}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSldv ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSldv}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSmhm ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSmhm}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSpdsk ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSpdsk}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSpma ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSpma}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSps ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSps}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSvdsk ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSvdsk}
+include setup/teradata/scripts/resusage_pdcr.tdb ResUsageSvpr ${TdBenchPdcrDb} ${TdBenchPdcrResUsageSvpr}
+
+goto setupviews
+
+label pdcrdbmissing
+echo 
+echo The environment variables for PDCR dbqlogtbl is not set. Proceeding making dbc only tables 
+echo TdBenchPdcrDb:${TdBenchPdcrDb} - TdBenchPdcrDBQLogTbl:${TdBenchPdcrDBQLogTbl}
+label dbconly
+echo Setting up views against DBQL and Resusage tables in DBC only
+include setup/teradata/scripts/dbql_nopdcr.tdb DBQLOGTBL
+include setup/teradata/scripts/dbql_nopdcr_other.tdb DBQLOGTBL DBQLSQLTBL
+include setup/teradata/scripts/dbql_nopdcr_other.tdb DBQLOGTBL DBQLOBJTBL
+include setup/teradata/scripts/dbql_nopdcr_other.tdb DBQLOGTBL DBQLSTEPTBL
+include setup/teradata/scripts/dbql_nopdcr_other.tdb DBQLOGTBL DBQLEXPLAINTBl
+include setup/teradata/scripts/findtable.tdb dbc DBQLPARAMTBL
+if :linecnt > 0 then include setup/teradata/scripts/dbql_nopdcr_other.tdb DBQLOGTBL DBQLPARAMTBL
+include setup/teradata/scripts/findtable.tdb dbc DBQLUTILITYTBL
+if :linecnt > 0 then include setup/teradata/scripts/dbql_nopdcr_util.tdb DBQLUTILITYTBL
+
+
+# ResUsageIpma
+# ResUsageIvpr
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSawt
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageScpu
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageShst
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSldv
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSmhm
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSpdsk
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSpma
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSps
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSvdsk
+include setup/teradata/scripts/resusage_nopdcr.tdb ResUsageSvpr
+
+label l
+
+goto setup_dbms_end
+
+label logon_error
+echo ERROR - the logon information provided on the DB alias in tdbench_${TdBench_DBMS}.tdb is incorrect
+goto setup_dbms_end
+
+label benchmark_rights_missing
+echo ERROR - unable to access ${TdBenchDb}. Please validate the grants or specified database to use. 
+goto setup_dbms_end
+
+label db_missing
+echo ERROR - The value of TdBenchDb in tdbench_teradata.sh or tdbench_teradata.bat may not be valid. Current setting: ${TdBenchDb}
+goto setup_dbms_end
+
+label db_rights_missing
+echo ERROR - unable to manipulate tables/views/functions in ${TdBenchDb}.  Please grant appropriate rights.
+goto setup_dbms_end
+
+label had_setup_error
+echo ERROR - The inistallation of the DBMS reporting package is incomplete due to errors
+
+label setup_dbms_end
+if :os = Linux then os if [ -e logs/teradata_setup.log ]; then rm logs/teradata_setup.log; else echo; fi
+if :os = Windows then os if EXIST logs\\teradata_setup.log erase logs\\teradata_setup.log
+
+trace save logs/teradata_setup.log
+

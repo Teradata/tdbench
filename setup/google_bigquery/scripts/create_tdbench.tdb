@@ -1,0 +1,15 @@
+echo delim=eof
+This will create the user ${TdBenchDb} to support reporting on system query logging table(s).
+
+Your default DB alias (from tdbench_google_bigquery_config) is: ${TdBenchServer}
+eof
+
+sql ${TdBenchServer} setup/google_bigquery/scripts/create_tdbench.sql
+
+if :retcode = 0 then echo all create statements were successful
+if :retcode = 0 then goto exit
+
+label error_exit
+echo ... tdbench database ${TdBenchDb} not created
+
+label exit

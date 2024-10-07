@@ -1,0 +1,43 @@
+# parms: :DbcTable, :PdcrDb, PdcrUtilitytbl - only difference is JobStartTime between ReleaseExecTime and ActualStopTime
+echo View ${TdBenchDb}.:i1 joins ${TdBenchDb}.TestTracking and dbc.:i1 and unions :i2.:i3
+sql text:temp/dbql_temp.sql ${TdBenchServer} delim=eof
+select Qtext from (
+select 10 (named Qseq, integer, title ''), 'replace view ' || '${TdBenchDb}' || '.' || ':i1' || ' as'  (named Qtext, varchar(120), title '') from ${TdBenchDb}.onerow  union
+select 20, 'select tt.RunID'  from ${TdBenchDb}.onerow union
+select 21, ',tt.ClientRunID'  from ${TdBenchDb}.onerow union
+select 25, ',tt.BenchSystemName ' from ${TdBenchDb}.onerow  union
+select 30,',tt.testname' from ${TdBenchDb}.onerow  union
+select 40,',tt.RunTitle' from ${TdBenchDb}.onerow  union
+select 50,',tt.ReleaseExecTime'  from ${TdBenchDb}.onerow  union
+select 60,',tt.ActualStopTime'  from ${TdBenchDb}.onerow  union
+select 70,',tt.ReportingStopTime'  from ${TdBenchDb}.onerow  union
+select 10000+dbc.columnid, ', ql.' || dbc.columnname
+    from dbc.ColumnsV dbc join dbc.ColumnsV pdcr
+       on dbc.databasename = 'dbc' and pdcr.databasename = ':i2'
+       and dbc.tablename = ':i1' and pdcr.tablename = ':i3'
+       and dbc.columnname = pdcr.columnname
+ union
+select 20000, 'from dbc.' || ':i1' || ' ql  join ' || '${TdBenchDb}' || '.TestTracking tt' from ${TdBenchDb}.onerow union
+select 20005, ' on ql.jobstarttime between tt.ReleaseExecTime and tt.ActualStopTime' from ${TdBenchDb}.onerow union
+select 20010, 'union all'  from ${TdBenchDb}.onerow  union
+select 20020, 'select tt.RunID'  from ${TdBenchDb}.onerow  union
+select 20021, ',tt.ClientRunID'  from ${TdBenchDb}.onerow union
+select 20025, ',tt.BenchSystemName ' from ${TdBenchDb}.onerow  union
+select 20030,',tt.testname' from ${TdBenchDb}.onerow  union
+select 20040,',tt.RunTitle' from ${TdBenchDb}.onerow  union
+select 20050,',tt.ReleaseExecTime'  from ${TdBenchDb}.onerow  union
+select 20060,',tt.ActualStopTime'  from ${TdBenchDb}.onerow  union
+select 20070,',tt.ReportingStopTime'  from ${TdBenchDb}.onerow  union
+select 30000+ dbc.columnid, ', ql.' || dbc.columnname
+    from dbc.ColumnsV dbc join dbc.ColumnsV pdcr
+       on dbc.databasename = 'dbc' and pdcr.databasename = ':i2'
+       and dbc.tablename = ':i1' and pdcr.tablename = ':i3'
+       and dbc.columnname = pdcr.columnname
+union
+select 40000, 'from '|| ':i2' || '.' || ':i3' || ' ql  join  ' || '${TdBenchDb}' || '.TestTracking tt' from ${TdBenchDb}.onerow union
+select 40005, ' on ql.jobstarttime between tt.ReleaseExecTime and tt.ActualStopTime ' from ${TdBenchDb}.onerow
+) x order by Qseq;
+eof
+
+sql ${TdBenchServer} temp/dbql_temp.sql
+sql ${TdBenchServer} comment on ${TdBenchDb}.:i1  as 'TdBench testtracking extensions to dbc.:i1 union to PDCR'; 

@@ -1,0 +1,104 @@
+set suf = .sh
+if :os = Windows then set suf = .bat
+
+if tdbench_:i1.tdb not exists then goto askoverlay
+read ans=no Type yes if you only want prompting to add another DB statement to tdbench_:i1.tdb:
+if :ans = yes then goto promptDB
+
+label askoverlay
+
+set fn = tdbench_config:suf
+if :fn not exists then goto copy1
+read ans=no You currently have a :fn. Type "yes" to overlay it:
+if :ans = yes then goto copy1
+echo since you entered :ans, your current :fn was preserved
+goto copy1done
+label copy1
+if :os != Windows then os cp setup/:i1/templates/:fn .
+if :os = Windows then os copy setup\\:i1\\templates\\:fn .
+echo copied :fn
+label copy1done
+
+set fn = tdbench_:i1_config:suf
+if :fn not exists then goto copy2
+read ans=no You currently have a :fn. Type "yes" to overlay it:
+if :ans = yes then goto copy2
+echo since you entered :ans, your current :fn was preserved
+goto copy2done
+label copy2
+if :os != Windows then os cp setup/:i1/templates/:fn .
+if :os = Windows then os copy setup\\:i1\\templates\\:fn .
+echo copied :fn
+label copy2done
+
+
+set fn = tdbench.tdb
+if :fn not exists then goto copy3
+read ans=no You currently have a :fn. Type "yes" to overlay it:
+if :ans = yes then goto copy3
+echo since you entered :ans, your current :fn was preserved
+goto copy3done
+label copy3
+if :os != Windows then os cp setup/:i1/templates/:fn .
+if :os = Windows then os copy setup\\:i1\\templates\\:fn .
+echo copied :fn
+label copy3done
+
+set fn = tdbench_:i1.tdb
+if :fn not exists then goto copy4
+read ans=no You currently have a :fn. Type "yes" to overlay it:
+if :ans = yes then goto copy4
+echo since you entered :ans, your current :fn was preserved
+goto copy4done
+label copy4
+if :os != Windows then os cp setup/:i1/templates/:fn .
+if :os = Windows then os copy setup\\:i1\\templates\\:fn .
+echo copied :fn
+label copy4done
+
+if :retcode = 1 then echo NOTE: you currently do not have a defined DB definition to logon to :i1
+read ans=no Type yes if you would like to be prompted in creating a DB statement:
+if :ans != yes then goto bypassDB
+
+label promptDB
+echo Defining DB statements ... listing existing definitions (if none, you will get error code = 1):
+if :os != Windows then os grep bigquery:// tdbench_:i1.tdb
+if :os = Windows then os findstr "bigquery://" tdbench_:i1.tdb
+echo delim=eof
+
+To create a database alias, you will be asked to provide:
+- your Google Cloud Project-ID
+- the oAuth service account email-ID
+- the oAuth key file authorizing the service account logon
+
+(Unlike other DBMSs, there is no logon/password for a user)
+
+You may stop the process by typing quit
+eof
+read dbname=quit Enter the db-alias-name you want to give for this connection:
+if :dbname = quit then goto abortDB
+read project=quit Enter your Google Cloud Project-ID: 
+if :project = quit then goto abortDB
+read oauth_email=quit Enter the email of the Google Cloud service account: 
+if :oauth_email = quit then goto abortDB
+read oauth_pvtkey=quit Enter the file name containing the JSON oAuth key: 
+if :oauth_pvtkey  = quit then goto abortDB
+
+echo append:tdbench_:i1.tdb set project = :project
+echo append:tdbench_:i1.tdb set oauth_email = :oauth_email
+echo append:tdbench_:i1.tdb set oauth_pvtkey = :oauth_pvtkey
+
+set project =
+set oauth_email =
+set oauth_pvtkey =
+
+echo append:tdbench_:i1.tdb db :dbname jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=:project;oAuthType=0;OAuthServiceAcctEmail=:oauth_email;OAuthPvtKeyPath=:oauth_pvtkey;Timeout=14400;useQueryCache=0
+
+echo The DB statement has been appended to tdbench_:i1.db:
+goto bypassDB
+
+label abortDB
+echo No DB comamnd was added to tdbench_:i1.tdb
+
+label bypassDB
+echo copy_templates.tdb is complete. NOTE: you may need to restart TdBench to see the effects.
