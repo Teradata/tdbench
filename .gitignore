@@ -23,7 +23,7 @@
 hs_err_pid*
 replay_pid*
 
-# script files for starting tdbench
+# script files for starting tdbench, database, and work files
 tdbench.*
-*.db
+tdbenchV2.*
 temp/
