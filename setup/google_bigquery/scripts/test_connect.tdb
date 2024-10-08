@@ -1,0 +1,16 @@
+exec setup/google_bigquery/scripts/validate_variables.tdb
+if :validate_variables = false then goto error_exit
+
+echo This will test the CLASS reference to your JDBC driver and the URL on the DB statement for: ${TdBenchServer}
+
+echo 
+echo To test access, using logon id :myuser to get current time on DB: ${TdBenchServer}
+sql ${TdBenchServer} select current_timestamp
+if :retcode = 0 then echo test successful
+if :retcode != 0 then echo ERROR: could not logon to :myuser at ${TdBenchServer} with the password provided.
+goto exit
+
+label error_exit
+echo ... Test not completed
+
+label exit

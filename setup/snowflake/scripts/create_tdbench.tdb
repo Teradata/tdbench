@@ -1,0 +1,19 @@
+echo delim=eof
+This will create the database ${TdBenchDb} to support reporting on system query logging table(s).
+
+Your default DB alias (from tdbench_snowflake_config) is: ${TdBenchServer}
+eof
+set mydbms =
+exec setup/snowflake/scripts/test_connect.tdb
+if :validate_variables = false then goto error_exit
+if :mydbms not set then goto error_exit
+
+sql :mydbms setup/snowflake/scripts/create_tdbench.sql
+
+if :retcode = 0 then echo all create statements were successful
+if :retcode = 0 then goto exit
+
+label error_exit
+echo ... tdbench database ${TdBenchDb} not created
+
+label exit

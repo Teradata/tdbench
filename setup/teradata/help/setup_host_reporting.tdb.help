@@ -1,0 +1,59 @@
+------------------------- Help for exec setup_host_reporting.tdb -------------------------
+
+This script creates a number of semantic reporting views based on the basic views 
+created by setup_tdbench.tdb. It also creates:
+- Functions used by those views semantic views
+- Reporting macros supporting more complicated reporting
+- Support Macros for manipulating host DBMS TestTracking table
+- adhoc DBC reporting views for use while debugging queries. 
+
+
+Functions:
+ExtractBenchQname    Extracts query name from ExtractBenchInfo function
+ExtractBenchQSubname Extracts query subname from ExtractBenchInfo function 
+TimestampSubtract    Subtracts 2nd timestamp from 1st timestamp giving seconds 
+
+Sematic Reporting Views:
+RptTestDetail     Shows all queries running in context of a RunId. Use with constraints RunId=? or RunId IN ( ).
+RptTestSteps      Reports detailed steps for queries in a given RunId or queryname across RunIds.
+RptTestObjects    Reports referenced objects for queries in a given RunId and/or queryname across RunIds.
+RptTestExplain    Reports the EXPLAIN text for queries in a given RunId and/or queryname across RunIds.
+RptTestSQL        Extracts the complete SQL for a given RunId or query across RunIds.
+RptSumRuns        Summarizes query execution statistics by benchmark users vs others across RunIds.
+RptSumErrors      Provides summary by run of executions and errors. You may want to constrain on RunId.
+RptSumQueries     Summarizes query executions for a test. Use with constraints RunId=? or RunId IN ( ).
+RptSystemCpu      Summarizes CPU, IO wait, and idle for each resuage logging event within RunID
+RptUsage          View summarizing usage by user/appid for a SessionDate constraint.
+RptLogonErrors    View summarizing irregular events from LogonOff table for a SessionDate constraint.
+RptAccessErrors   View summarizing access violations for a SessionDate constraint.
+
+
+Reporting Macros:
+RptCompareSerialQueriesRank  Compares queries from 2 SERIAL runids where RunSecs of RunID2 > MinRunSecs, 
+                             selecting top "n" based on ratio of either RunSecs, Cpu, Parse, or IO
+RptCompareWorkloadRank        Compares queries from 2 WORKLOAD runids where AveRunSecs of RunID2 > MinRunSecs, 
+                              selecting top "n" based on ratio of either averages of RunSecs, Cpu, Parse, or IO
+RptListAllRunid      List out all information on all RunIds, ordered by RunID
+RptWorkloadInFlight  Analyze workloads in flight each n seconds for given RunID and optional frequency (default n=30 sec)
+RptQueryInFlight     Analyze queries in flight each n seconds for given RunID and optional frequency (default n=30 sec)
+DailyReport          Run RptUsage, RptLogonErrors and RptAccessErrors between 2 dates, both defaulting to date-1.
+
+Support Macros for TestTracking:
+TestCondition        Macro to update/view the condition comments in TestTracking
+TestList             Macro to list out recent tests from TestTracking
+TestNote             Macro to update/view the notes comments in TestTracking
+TestReport           Macro to generate a report on a RunID.
+TestTitle            Macro to replace/view the test title in TestTracking
+
+
+Adhoc DBC reporting views:
+ql                Simplification of DBC.DBQL Log table for analysis of execution of queries and macros.
+qls               Analysis of the steps of a query within the context of the logged query. Use with constraints on QueryId.
+
+These Adhoc DBC reporting views go directly at DBC tables without TestTracking joins. Suggested usage:
+- Get the latest DBQL flushed to Disk with: flush query logging with all
+- Use the following constraint on ql to get recent queries:
+     where starttime > currenttimestamp - interval '20' minute and username = user order by starttime
+- Then for one query of interest, find its 18 digit queryid and use the constraint on qls:
+     where queryid = nnnnnnnnnnnnnnnnnn
+

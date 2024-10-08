@@ -1,0 +1,33 @@
+------------------------- Help for editing create_tdbench.sql ------------------------- 
+
+This will create the reporting database/user on the host DBMS platform with the necessary rights
+to support reporting. There are environment variables in the script set by ...config.sh/...config.bat
+and TdBench variables that are set by the setup script create_tdbench.tdb. When you run 
+create_tdbench.tdb, 
+- you'll be asked for the logon ID and password for the user that has the CREATE USER rights for the parent database 
+- you'll be asked for the parent database from which storage will be transfered for the TdBenchDb user
+- you'll be asked for the password that the TdBench user will use for logging onto the system. 
+
+Policies at companies vary widely about creating users and gaining access to contents of system databases. 
+The following may help you in navigating those policies when installing TdBench. It may be possible to 
+provide the statements to a system DBA so they do the setup for you. 
+
+create database/user ...
+   It is simplest if the reporting database and the logon ID to manage the test reporting are one in the same.
+   If you are not allowed to create users, you may create databases instead.
+
+create the TestTracking table
+   This is maintained by the BEFORE_RUN and AFTER_RUN statements that capture information from 
+   the test definition along with precise start and stop timestamps from the host DBMS to make
+   it easier to extract query log rows that are generated during the test. 
+
+create the tdbenchinfo table
+   This documents the current release of TdBench.
+
+create starter DBMS reporting view
+   With the TestTracking table carrying the RunID of each test, the precise start/stop
+   timestamps from the host DBMS, the views can join the TestTracking to log files allowing
+   comparision of results with a constraint such as "where runid in (5,21,40)". The analysis
+   you can do with the database built into TdBench supports understanding of performance
+   the end-user will see. The analysis you get from the host DBMS reporting views helps
+   to understand what the DBMS was doing and what each query costs.  

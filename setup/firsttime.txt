@@ -1,0 +1,20 @@
+                          TdBench 8.01.03 Release
+
+Information on this release can be found in the following:
+- readme.txt: an overview of setting up to work with your database
+- help: a command inside TdBench accessing descriptions of 50+ commands and overviews
+- TdBench 8.01 User Guide: a manual on developer.teradata.com with usage suggestions
+- release_notes.txt: what has changed in the scripts surrounding TdBench
+- help release: what has changed in the TdBench command language
+
+The most current version of TdBench will be made available on the web site:
+   developer.teradata.com
+
+The most recent release of setup directories for various databases is located at:
+   https://github.com/Teradata/tdbench
+
+You can also raise issues on that github site and get support from other users
+
+NOTICE:
+This software is the intellectual property of the Teradata Corporation. The restrictions 
+on usage are listed in setup/license.txt and under TdBench with the command: help license.
