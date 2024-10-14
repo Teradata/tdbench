@@ -4,6 +4,10 @@ and setup the environment.
 For detailed information about changes inside of TdBench command and execution capabilities,
 issue the TdBench command:  HELP RELEASE
 
+TdBench 8.01.04 Release Notes
+- improved processing for PARAM allowing invalid parameters to be ignored in comments
+- PREPARE can now be turned on/off for queues without needed to adjust SQL or PARAM files
+- Improved help information
 
 TdBench 8.01.03 Release Notes
 - Added basic host DBMS reporting capabilities for:
