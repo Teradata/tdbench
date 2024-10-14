@@ -3,7 +3,7 @@
 :: It specifies which version of the JAVA program to run and which DBMS configuration file to run.
 :: The setting of TdBench_DBMS may be overridden on the command line of tdbench.sh with the -d parameter.
 
-set "TdBench_jar_version=tdbench-8.01.03.jar" 
+set "TdBench_jar_version=tdbench-8.01.04" 
   
 set TdBench_DBMS=google_bigquery
 if not "%~1" == "" set TdBench_DBMS=%~1

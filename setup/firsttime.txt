@@ -1,4 +1,4 @@
-                          TdBench 8.01.03 Release
+                          TdBench 8.01.04 Release
 
 Information on this release can be found in the following:
 - readme.txt: an overview of setting up to work with your database

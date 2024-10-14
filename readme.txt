@@ -1,4 +1,4 @@
-TdBench 8.01.03 Readme
+TdBench 8.01.04 Readme
 
 This product will enable you to simulate realistic production conditions with
 complex workloads consisting of multiple queues of queries and OS commands 
